@@ -1,6 +1,7 @@
 import builder : AddBuilder;
 
 import std.stdio;
+import std.typecons : Nullable, nullable;
 
 class A1 {
   int a;
@@ -89,4 +90,24 @@ template MakeA5(alias T) {
 /// For now, only classes are supported, and not structs.
 unittest {
   assert(__traits(compiles, MakeA5!1) == false);
+}
+
+/// Assure that values that are assignable work with fields.
+class A6 {
+  Nullable!int a;
+  Nullable!int b;
+  Nullable!int c;
+  mixin AddBuilder!(typeof(this));
+}
+
+unittest {
+  import std.typecons : nullable;
+  A6 a6 = A6.builder()
+      .a(nullable(1))
+      .b(2)
+      .c(false)
+      .build();
+  assert(a6.a == 1);
+  assert(a6.b == 2);
+  assert(a6.c == 0);
 }

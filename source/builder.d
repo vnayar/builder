@@ -55,6 +55,7 @@ mixin template AddBuilder(T)
 if (is(T == class))
 {
   import std.range : iota;
+  import std.traits : isAssignable;
   import std.traits : Fields, FieldNameTuple, BaseClassesTuple;
 
   // [Fields] returns the field types and [FieldNameTuple] returns the field names.
@@ -93,20 +94,21 @@ if (is(T == class))
 
   mixin template AddClassFields(C) {
     static foreach (size_t i; iota(0, Fields!(C).length)) {
-      mixin AddField!(C, Fields!(C)[i], FieldNameTuple!(C)[i]);
+      mixin AddField!(Fields!(C)[i], FieldNameTuple!(C)[i]);
       mixin AddSetter!(Fields!(C)[i], FieldNameTuple!(C)[i]);
     }
   }
 
   // TODO: Extract the initializer value and apply it rather than using a separate bool.
-  mixin template AddField(CT, FT, string N) {
+  mixin template AddField(FT, string N) {
     mixin("private ", "bool _", N, "_isSet = false;");
     mixin("private ", FT, " _", N, ";");
   }
 
   mixin template AddSetter(FT, string N) {
     mixin(
-        "Builder ", N, "(", FT, " ", N, ") {",
+        "Builder ", N, "(ST)(ST ", N, ") ",
+        "if (isAssignable!(FT, ST)) {",
         "  this._", N, "_isSet = true;",
         "  this._", N, " = ", N, ";",
         "  return this;",
