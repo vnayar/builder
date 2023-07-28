@@ -106,6 +106,14 @@ if (is(T == class))
   }
 
   mixin template AddSetter(FT, string N) {
+    // Exact type match, because 'isAssignable' does not work for function types.
+    mixin(
+        "Builder ", N, "(FT ", N, ") {",
+        "  this._", N, "_isSet = true;",
+        "  this._", N, " = ", N, ";",
+        "  return this;",
+        "}");
+    // Use any assignable type, e.g. allowing `.value(3)` for a `Nullable!int` type.
     mixin(
         "Builder ", N, "(ST)(ST ", N, ") ",
         "if (isAssignable!(FT, ST)) {",

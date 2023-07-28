@@ -111,3 +111,20 @@ unittest {
   assert(a6.b == 2);
   assert(a6.c == 0);
 }
+
+/// Assure that function types can be passed in.
+class A7 {
+  int function(int) fa;
+  int delegate(int) fb;
+
+  mixin AddBuilder!(typeof(this));
+}
+
+unittest {
+  A7 a7 = A7.builder()
+      .fa((int a) { return a; })
+      .fb((int b) { return b; })
+      .build();
+  assert(a7.fa(1) == 1);
+  assert(a7.fb(2) == 2);
+}
